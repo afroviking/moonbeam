@@ -1,4 +1,12 @@
-import { Action, ActionPanel, List, showToast, Toast, Form, getPreferenceValues } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  List,
+  showToast,
+  Toast,
+  Form,
+  getPreferenceValues,
+} from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { Icon } from "@raycast/api";
@@ -18,52 +26,62 @@ interface FormValues {
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
-  const { value: habits, setValue: setHabits } = useLocalStorage<Habit[]>("habits", []);
+  const { apiToken } = getPreferenceValues<Preferences>();
+  const { value: habits, setValue: setHabits } = useLocalStorage<Habit[]>(
+    "habits",
+    [],
+  );
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
-  const [showAddHabitForm, setShowAddHabitForm] = useState(false);
 
   useEffect(() => {
-    if (!preferences.apiToken) {
+    if (!apiToken) {
       showToast({
         style: Toast.Style.Failure,
         title: "API Token Required",
-        message: "Please set your Lunatask API token in the extension preferences",
+        message:
+          "Please set your Lunatask API token in the extension preferences",
       });
     }
     setIsLoading(false);
-  }, [preferences.apiToken]);
+  }, [apiToken]);
 
   const handleCompleteHabit = async (habitId: string) => {
-    if (!preferences.apiToken) {
+    if (!apiToken) {
       await showToast({
         style: Toast.Style.Failure,
         title: "API Token Required",
-        message: "Please set your Lunatask API token in the extension preferences",
+        message:
+          "Please set your Lunatask API token in the extension preferences",
       });
       return;
     }
 
     try {
-      const response = await fetch(`https://api.lunatask.app/v1/habits/${habitId}/track`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${preferences.apiToken}`,
+      const response = await fetch(
+        `https://api.lunatask.app/v1/habits/${habitId}/track`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiToken}`,
+          },
+          body: JSON.stringify({
+            performed_on: new Date().toISOString().split("T")[0],
+          }),
         },
-        body: JSON.stringify({
-          performed_on: new Date().toISOString().split('T')[0],
-        }),
-      });
+      );
 
       const responseData = await response.json();
 
       if (!response.ok) {
         if (response.status === 401) {
-          throw new Error("Invalid API token. Please check your token in the extension preferences.");
+          throw new Error(
+            "Invalid API token. Please check your token in the extension preferences.",
+          );
         }
-        throw new Error(`Failed to complete habit: ${JSON.stringify(responseData)}`);
+        throw new Error(
+          `Failed to complete habit: ${JSON.stringify(responseData)}`,
+        );
       }
 
       await showToast({
@@ -74,17 +92,19 @@ export default function Command() {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to complete habit",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
+        message:
+          error instanceof Error ? error.message : "Unknown error occurred",
       });
     }
   };
 
   const handleAddHabit = async (values: FormValues) => {
-    if (!preferences.apiToken) {
+    if (!apiToken) {
       await showToast({
         style: Toast.Style.Failure,
         title: "API Token Required",
-        message: "Please set your Lunatask API token in the extension preferences",
+        message:
+          "Please set your Lunatask API token in the extension preferences",
       });
       return;
     }
@@ -99,28 +119,32 @@ export default function Command() {
     }
 
     try {
-      const newHabits = [...(habits || []), { id: values.id, name: values.name }];
+      const newHabits = [
+        ...(habits || []),
+        { id: values.id, name: values.name },
+      ];
       await setHabits(newHabits);
       await showToast({
         style: Toast.Style.Success,
         title: "Habit added successfully",
       });
-      setShowAddHabitForm(false);
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to add habit",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
+        message:
+          error instanceof Error ? error.message : "Unknown error occurred",
       });
     }
   };
 
   const handleRemoveHabit = async (habitId: string) => {
-    if (!preferences.apiToken) {
+    if (!apiToken) {
       await showToast({
         style: Toast.Style.Failure,
         title: "API Token Required",
-        message: "Please set your Lunatask API token in the extension preferences",
+        message:
+          "Please set your Lunatask API token in the extension preferences",
       });
       return;
     }
@@ -136,7 +160,8 @@ export default function Command() {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to remove habit",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
+        message:
+          error instanceof Error ? error.message : "Unknown error occurred",
       });
     }
   };
@@ -147,23 +172,22 @@ export default function Command() {
 
   if (!habits || habits.length === 0) {
     return (
-      // @ts-ignore - Raycast API component type errors
       <List>
         <List.EmptyView
           title="No habits configured"
           description="Press ⌘K to add a new habit"
           actions={
-            // @ts-ignore - Raycast API component type errors
             <ActionPanel>
               <Action.Push
                 title="Add Habit"
                 target={
-                  // @ts-ignore - Raycast API component type errors
                   <Form
                     actions={
-                      // @ts-ignore - Raycast API component type errors
                       <ActionPanel>
-                        <Action.SubmitForm title="Add Habit" onSubmit={handleAddHabit} />
+                        <Action.SubmitForm
+                          title="Add Habit"
+                          onSubmit={handleAddHabit}
+                        />
                       </ActionPanel>
                     }
                   >
@@ -188,21 +212,20 @@ export default function Command() {
   }
 
   return (
-    // @ts-ignore - Raycast API component type errors
     <List
       actions={
-        // @ts-ignore - Raycast API component type errors
         <ActionPanel>
           <Action.Push
             title="Add Habit"
             icon={Icon.Plus}
             target={
-              // @ts-ignore - Raycast API component type errors
               <Form
                 actions={
-                  // @ts-ignore - Raycast API component type errors
                   <ActionPanel>
-                    <Action.SubmitForm title="Add Habit" onSubmit={handleAddHabit} />
+                    <Action.SubmitForm
+                      title="Add Habit"
+                      onSubmit={handleAddHabit}
+                    />
                   </ActionPanel>
                 }
               >
@@ -228,7 +251,6 @@ export default function Command() {
           title={habit.name}
           subtitle={`Press ${index + 1} to complete`}
           actions={
-            // @ts-ignore - Raycast API component type errors
             <ActionPanel>
               <Action
                 title="Complete Habit"
@@ -245,12 +267,13 @@ export default function Command() {
                 title="Add Habit"
                 icon={Icon.Plus}
                 target={
-                  // @ts-ignore - Raycast API component type errors
                   <Form
                     actions={
-                      // @ts-ignore - Raycast API component type errors
                       <ActionPanel>
-                        <Action.SubmitForm title="Add Habit" onSubmit={handleAddHabit} />
+                        <Action.SubmitForm
+                          title="Add Habit"
+                          onSubmit={handleAddHabit}
+                        />
                       </ActionPanel>
                     }
                   >
@@ -273,4 +296,4 @@ export default function Command() {
       ))}
     </List>
   );
-} 
+}

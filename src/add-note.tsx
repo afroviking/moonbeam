@@ -32,7 +32,8 @@ export default function Command() {
       showToast({
         style: Toast.Style.Failure,
         title: "API Token Required",
-        message: "Please set your Lunatask API token in the extension preferences",
+        message:
+          "Please set your Lunatask API token in the extension preferences",
       });
     }
   }, [preferences.apiToken]);
@@ -43,7 +44,8 @@ export default function Command() {
         await showToast({
           style: Toast.Style.Failure,
           title: "API Token Required",
-          message: "Please set your Lunatask API token in the extension preferences",
+          message:
+            "Please set your Lunatask API token in the extension preferences",
         });
         return;
       }
@@ -52,7 +54,8 @@ export default function Command() {
         await showToast({
           style: Toast.Style.Failure,
           title: "Notebook ID Required",
-          message: "Please set your Lunatask Notebook ID in the extension preferences",
+          message:
+            "Please set your Lunatask Notebook ID in the extension preferences",
         });
         return;
       }
@@ -77,7 +80,7 @@ export default function Command() {
             name: values.title,
             content: formatMarkdownContent(values.content || ""),
             notebook_id: preferences.notebookId,
-            note_on: new Date().toISOString().split('T')[0],
+            note_on: new Date().toISOString().split("T")[0],
             source: "raycast",
             source_id: generateSourceId(),
           }),
@@ -87,9 +90,13 @@ export default function Command() {
 
         if (!response.ok) {
           if (response.status === 401) {
-            throw new Error("Invalid API token. Please check your token in the extension preferences.");
+            throw new Error(
+              "Invalid API token. Please check your token in the extension preferences.",
+            );
           }
-          throw new Error(`Failed to create note: ${JSON.stringify(responseData)}`);
+          throw new Error(
+            `Failed to create note: ${JSON.stringify(responseData)}`,
+          );
         }
 
         await showToast({
@@ -100,7 +107,8 @@ export default function Command() {
         await showToast({
           style: Toast.Style.Failure,
           title: "Failed to create note",
-          message: error instanceof Error ? error.message : "Unknown error occurred",
+          message:
+            error instanceof Error ? error.message : "Unknown error occurred",
         });
       }
     },
@@ -127,4 +135,4 @@ export default function Command() {
       />
     </Form>
   );
-} 
+}
