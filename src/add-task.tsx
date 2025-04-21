@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
+import { useForm } from "@raycast/utils";
 
 interface Preferences {
   apiToken: string;
@@ -7,8 +8,8 @@ interface Preferences {
 }
 
 interface FormValues {
-  title: string;
-  note: string;
+  name: string;
+  description: string;
 }
 
 function getNextDayOfWeek(dayName: string): Date {
@@ -139,7 +140,6 @@ function formatLocalDate(date: Date): string {
 }
 
 export default function Command() {
-  const [isLoading, setIsLoading] = useState(false);
   const preferences = getPreferenceValues<Preferences>();
 
   useEffect(() => {
@@ -152,97 +152,95 @@ export default function Command() {
     }
   }, [preferences.apiToken]);
 
-  const handleSubmit = async (values: FormValues) => {
-    if (!preferences.apiToken) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "API Token Required",
-        message: "Please set your Lunatask API token in the extension preferences",
-      });
-      return;
-    }
-
-    if (!preferences.areaId) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Area ID Required",
-        message: "Please set your Lunatask Area ID in the extension preferences",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      // Parse the title to extract date information
-      const { title, date } = parseNaturalDateTime(values.title);
-      
-      const requestBody = {
-        name: title,
-        scheduled_on: date ? formatLocalDate(date) : null,
-        area_id: preferences.areaId,
-        source: "raycast",
-        source_id: generateSourceId(),
-        note: values.note || null
-      };
-      
-      const response = await fetch("https://api.lunatask.app/v1/tasks", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${preferences.apiToken}`,
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      const responseData = await response.json();
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error("Invalid API token. Please check your token in the extension preferences.");
-        }
-        throw new Error(`Failed to create task: ${JSON.stringify(responseData)}`);
+  const { handleSubmit, itemProps } = useForm<FormValues>({
+    onSubmit: async (values) => {
+      if (!preferences.apiToken) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "API Token Required",
+          message: "Please set your Lunatask API token in the extension preferences",
+        });
+        return;
       }
 
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Task created successfully",
-      });
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to create task",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      if (!preferences.areaId) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Area ID Required",
+          message: "Please set your Lunatask Area ID in the extension preferences",
+        });
+        return;
+      }
+
+      if (!values.name) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Task Name Required",
+          message: "Please enter a name for the task",
+        });
+        return;
+      }
+
+      try {
+        const requestBody = {
+          name: values.name,
+          description: values.description || null,
+          area_id: preferences.areaId,
+          source: "raycast",
+          source_id: generateSourceId(),
+        };
+
+        const response = await fetch("https://api.lunatask.app/v1/tasks", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${preferences.apiToken}`,
+          },
+          body: JSON.stringify(requestBody),
+        });
+
+        const responseData = await response.json();
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error("Invalid API token. Please check your token in the extension preferences.");
+          }
+          throw new Error(`Failed to create task: ${JSON.stringify(responseData)}`);
+        }
+
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Task created successfully",
+        });
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to create task",
+          message: error instanceof Error ? error.message : "Unknown error occurred",
+        });
+      }
+    },
+  });
 
   return (
-    // @ts-ignore - Raycast API components have specific return types that TypeScript flags as errors
+    // @ts-ignore - Raycast API component type errors
     <Form
-      isLoading={isLoading}
       actions={
+        // @ts-ignore - Raycast API component type errors
         <ActionPanel>
-          <Action.SubmitForm
-            title="Create Task"
-            icon={Icon.Plus}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Add Task" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.TextField
-        id="title"
-        title="Task Title"
-        placeholder="Enter task title (e.g., 'Clear inbox Sunday')"
-        autoFocus
+        title="Task Name"
+        placeholder="Enter task name"
+        {...itemProps.name}
       />
       <Form.TextArea
-        id="note"
-        title="Notes"
-        placeholder="Add any additional notes or details (supports Markdown)"
-        enableMarkdown
+        title="Description"
+        placeholder="Enter task description (optional)"
+        {...itemProps.description}
       />
     </Form>
   );

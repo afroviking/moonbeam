@@ -171,6 +171,7 @@ export default function Command() {
   return (
     <Form
       actions={
+        // @ts-ignore - Raycast API component type errors
         <ActionPanel>
           <Action.SubmitForm title="Add Relationship" onSubmit={handleSubmit} />
         </ActionPanel>

@@ -110,7 +110,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Note" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Add Note" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
