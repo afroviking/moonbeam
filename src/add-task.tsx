@@ -110,7 +110,7 @@ export default function Command() {
           style: Toast.Style.Success,
           title: "Task created successfully",
         });
-      } catch (error) {
+      } catch {
         showFailureToast(error, { title: "Failed to create task" });
       }
     },

@@ -99,7 +99,7 @@ export default function Command() {
           style: Toast.Style.Success,
           title: "Note created successfully",
         });
-      } catch (error) {
+      } catch {
         showFailureToast(error, { title: "Failed to create note" });
       }
     },
