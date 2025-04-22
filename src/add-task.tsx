@@ -26,7 +26,9 @@ const generateSourceId = (): string => {
   return `${timestamp}-${random}`;
 };
 
-const parseDateFromText = (text: string): { cleanText: string; dueDate?: string } => {
+const parseDateFromText = (
+  text: string,
+): { cleanText: string; dueDate?: string } => {
   const parsedDate = chrono.parseDate(text);
   if (!parsedDate) {
     return { cleanText: text };
@@ -85,7 +87,7 @@ export default function Command() {
 
       try {
         const { cleanText, dueDate } = parseDateFromText(values.name);
-        
+
         const requestBody = {
           name: cleanText,
           description: values.description || null,
