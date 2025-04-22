@@ -100,8 +100,8 @@ export default function Command() {
           title: "Note created successfully",
         });
       } catch (error) {
-        showFailureToast(error instanceof Error ? error : new Error("Failed to create note"), { 
-          title: "Failed to create note" 
+        showFailureToast(error instanceof Error ? error : new Error("Failed to create note"), {
+          title: "Failed to create note",
         });
       }
     },
