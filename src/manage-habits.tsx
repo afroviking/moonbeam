@@ -78,7 +78,7 @@ export default function Command() {
         style: Toast.Style.Success,
         title: "Habit completed successfully",
       });
-    } catch {
+    } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to complete habit",
@@ -113,7 +113,7 @@ export default function Command() {
         style: Toast.Style.Success,
         title: "Habit added successfully",
       });
-    } catch {
+    } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to add habit",
@@ -139,7 +139,7 @@ export default function Command() {
         style: Toast.Style.Success,
         title: "Habit removed successfully",
       });
-    } catch {
+    } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to remove habit",

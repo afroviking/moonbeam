@@ -99,8 +99,10 @@ export default function Command() {
           style: Toast.Style.Success,
           title: "Note created successfully",
         });
-      } catch {
-        showFailureToast(error, { title: "Failed to create note" });
+      } catch (error) {
+        showFailureToast(error instanceof Error ? error : new Error("Failed to create note"), { 
+          title: "Failed to create note" 
+        });
       }
     },
   });
